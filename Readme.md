@@ -5,7 +5,7 @@
 </p>
 
 ## 🚀 Deploy on Heroku 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://dashboard.heroku.com/deploy?template=https://github.com/vaibhavchandra13/YukkiMultiSpamBot/tree/patch-1)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://dashboard.heroku.com/deploy?template=https://github.com/vaibhavchandra13/YukkiMultiSpamBot/)
 
 You can Use these [API ID and API HASH](https://t.me/OfficialYukki/135) while deploying
 

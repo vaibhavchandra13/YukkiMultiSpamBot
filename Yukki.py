@@ -10,6 +10,8 @@ from Config import STRING, SUDO, BIO_MESSAGE, API_ID, API_HASH, STRING2, STRING3
 import asyncio
 import telethon.utils
 from telethon.tl import functions
+from telethon.tl.functions.channels import GetFullChannelRequest
+from telethon.tl.functions.messages import GetFullChatRequest
 from telethon.tl.functions.channels import LeaveChannelRequest
 from telethon.tl.functions.messages import ImportChatInviteRequest
 from Utils import RAID, RRAID
@@ -328,6 +330,49 @@ async def gifspam(e, smex):
     except Exception as e:
         pass
 
+    
+async def get_chatinfo(event):
+    chat = event.pattern_match.group(1)
+    chat_info = None
+    if chat:
+        try:
+            chat = int(chat)
+        except ValueError:
+            pass
+    if not chat:
+        if event.reply_to_msg_id:
+            replied_msg = await event.get_reply_message()
+            if replied_msg.fwd_from and replied_msg.fwd_from.channel_id is not None:
+                chat = replied_msg.fwd_from.channel_id
+        else:
+            chat = event.chat_id
+    try:
+        chat_info = await event.client(GetFullChatRequest(chat))
+    except:
+        try:
+            chat_info = await event.client(GetFullChannelRequest(chat))
+        except ChannelInvalidError:
+            await event.reply("`Invalid channel/group`")
+            return None
+        except ChannelPrivateError:
+            await event.reply(
+                "`This is a private channel/group or I am banned from there`"
+            )
+            return None
+        except ChannelPublicGroupNaError:
+            await event.reply("`Channel or supergroup doesn't exist`")
+            return None
+        except (TypeError, ValueError):
+            await event.reply("`Invalid channel/group`")
+            return None
+    return chat_info
+
+
+def user_full_name(user):
+    names = [user.first_name, user.last_name]
+    names = [i for i in list(names) if i]
+    full_name = " ".join(names)
+    return full_name
 
 @idk.on(events.NewMessage(incoming=True, pattern=r"\.bio"))
 @ydk.on(events.NewMessage(incoming=True, pattern=r"\.bio"))
@@ -572,6 +617,52 @@ async def spam(e):
         else:
             await e.reply(usage, parse_mode=None, link_preview=None )
 
+@idk.on(events.NewMessage(incoming=True, pattern=r"\.inviteall"))
+@ydk.on(events.NewMessage(incoming=True, pattern=r"\.inviteall"))
+@wdk.on(events.NewMessage(incoming=True, pattern=r"\.inviteall"))
+@hdk.on(events.NewMessage(incoming=True, pattern=r"\.inviteall"))
+@sdk.on(events.NewMessage(incoming=True, pattern=r"\.inviteall"))
+@adk.on(events.NewMessage(incoming=True, pattern=r"\.inviteall"))
+@bdk.on(events.NewMessage(incoming=True, pattern=r"\.inviteall"))
+@cdk.on(events.NewMessage(incoming=True, pattern=r"\.inviteall"))
+@edk.on(events.NewMessage(incoming=True, pattern=r"\.inviteall"))
+@ddk.on(events.NewMessage(incoming=True, pattern=r"\.inviteall"))        
+async def get_users(event):
+        usage = "𝗠𝗼𝗱𝘂𝗹𝗲 𝗡𝗮𝗺𝗲 = 𝗜𝗻𝘃𝗶𝘁𝗲𝗮𝗹𝗹\n\nCommand:\n\n.inviteall <Username of Group>\n\n.inviteall <Username of Group>"
+    sender = await event.get_sender()
+    me = await event.client.get_me()
+    if not sender.id == me.id:
+        yukki = await edit_or_reply(event, "`processing...`")
+    else:
+        yukki = await edit_or_reply(event, "`processing...`")
+    kraken = await get_chatinfo(event)
+    chat = await event.get_chat()
+    if event.is_private:
+        return await yukki.edit("`Sorry, Cant kidnape users here`")
+    s = 0
+    f = 0
+    error = "None"
+
+    await mafia.edit("**TerminalStatus**\n\n`kidnapeing Users.......`")
+    async for user in event.client.iter_participants(kraken.full_chat.id):
+        try:
+            if error.startswith("Too"):
+                return await yukki.edit(
+                    f"**Terminal Finished With Error**\n(`May Got Limit Error from telethon Please try agin Later`)\n**Error** : \n`{error}`\n\n• kidnaped `{s}` people \n• Failed to kidnape `{f}` people"
+                )
+            await event.client(
+                functions.channels.InviteToChannelRequest(channel=chat, users=[user.id])
+            )
+            s = s + 1
+            await yukki.edit(
+                f"**Terminal Running...**\n\n• Invited `{s}` people \n• Failed to Invite `{f}` people\n\n**× LastError:** `{error}`"
+            )
+        except Exception as e:
+            error = str(e)
+            f = f + 1
+    return await yukki.edit(
+        f"**Terminal Finished** \n\n• Successfully kidnaped `{s}` people \n• failed to kidnape `{f}` people"
+    )
 
 @idk.on(events.NewMessage(incoming=True, pattern=r"\.raid"))
 @ydk.on(events.NewMessage(incoming=True, pattern=r"\.raid"))
